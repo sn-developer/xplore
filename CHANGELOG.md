@@ -1,6 +1,20 @@
 # Xplore: Developer Toolkit
 A toolkit for every ServiceNow developer.
 
+### Version 5.02 - February 12, 2025
+* Removed use of CDN's; dependencies are all local.
+* Added toolbar to script editor for common actions including find and replace.
+* Automatic script linting and code folding is now supported.
+* Added support for syntax macros.
+* Added support for code completion.
+* Added support for Script Debugger.
+* Scoped script execution access warning has been hidden.
+* Added example (inactive) Scheduled Script Action for cleaning up Xplore user script includes.
+* Disabled user script include versions and update set history.
+* Fixed a bug where a new user script include would be created when impersonating.
+* Made the breadcrumb clearer for undefined and null values.
+* Minor UX upgrades.
+
 ### Version 5.01 - November 19, 2024
 * Fixed "Open List in Xplore" list action. 
 

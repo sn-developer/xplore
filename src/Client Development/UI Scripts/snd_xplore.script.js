@@ -154,7 +154,8 @@ var snd_xplore = (function () {
         dataType: 'json'
       })
       .done(function (data) {
-        var result = data.result;
+        data.result.messages = result.messages.concat(data.result.messages);
+        result = data.result;
         if (xhr.responseText) {
           message(result, '1', xhr.responseText); // 1 = warning
         } else {
@@ -185,7 +186,8 @@ var snd_xplore = (function () {
     })
     .done(function (data) {
       var result;
-      if (!data || (!data.result && !data.$error)) {
+      // data.error is from SN, data.$error is from Xplore processor
+      if (!data || (!data.result && !data.$error && !data.error)) {
         result = psuedoResult();
         message(result, 'error', 'The server did not return anything. This is likely because' +
             ' of an uncatchable error. Please check the node logs for the possibility' +
@@ -195,16 +197,11 @@ var snd_xplore = (function () {
       }
 
       result = data.result || psuedoResult();
-      if (data.$error) {
-        message(result, 'error', data.$error);
+      if (data.$error || data.error) {
+        message(result, 'error', data.$error || data.error);
       } else if (!data.result) {
         message(result, 'error', 'Request processing failed without an error. Please check the logs.');
         enrichWithLogs({}, result);
-      }
-      if (!data.result) {
-        if (data.$error) {
-        } else {
-        }
       }
 
       params.reporter.done(result);

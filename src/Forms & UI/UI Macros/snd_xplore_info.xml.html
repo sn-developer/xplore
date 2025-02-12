@@ -49,59 +49,36 @@
         <div class="panel-body">
           <h2>Release notes</h2>
 
-          <h3>Version 4.9</h3>
+          <h3>Version 5.02</h3>
           <ul>
-            <li>Added two new options to history items to open them in a new tab or share them via encoded URL.
-            Large links can be pasted directly into the script editor where they will be loaded automatically.</li>
-            <li>Added a "Copy to Clipboard" link on the Output pane for easy copying of the result table.</li>
-            <li>Added padding to log message milliseconds so they line up nicely.</li>
-            <li>Added option to disable "Ctrl + S" shortcut.</li>
-            <li>Fixed a bug where object property names would be not be shown in the results.</li>
-            <li>Fixed a bug where JSON user data would show up as "[object Object]" when loading from history.</li>
-            <li>Fixed a bug caused by User Data Format being set but no user data being given.</li>
-            <li>Fixed a bug where result properties names containing HTML/JavaScript were being executed when added to the result table.</li>
-            <li>Fixed the contrast on keyword elements.</li>
-            <li>General theming improvements.</li>
+            <li>Removed use of CDN's; dependencies are all local.</li>
+            <li>Added toolbar to script editor for common actions including find and replace.</li>
+            <li>Automatic script linting and code folding is now supported.</li>
+            <li>Added support for syntax macros.</li>
+            <li>Added support for code completion.</li>
+            <li>Scoped script execution access warning has been hidden.</li>
+            <li>Added example (inactive) Scheduled Script Action for cleaning up Xplore user script includes.</li>
+            <li>Disabled user script include versions and update set history.</li>
+            <li>Fixed a bug where a new user script include would be created when impersonating.</li>
+            <li>Made the breadcrumb clearer for undefined and null values.</li>
+            <li>Minor UX upgrades.</li>
           </ul>
 
-          <h3>Version 4.8</h3>
+          <h3>Version 5.01</h3>
           <ul>
-            <li>(beta) Added support for themes! The themes have been adapted from CodeMirror
-              themes to with Xplore so some work better than others.</li>
-            <li>Added script execution history. Each time you open Xplore, a new session is
-              started and your script is saved when you run it. By default, 50 sessions
-              are stored, but you can change this number using a system property. This is
-              user specific.</li>
-            <li>Settings from within Xplore are now able to be saved so they are loaded the next
-              time Xplore is opened. This is user specific.</li>
-            <li>Added automatic link recognition to Xplore output. Reference fields, links, and
-              table.sys_id values are automatically converted to clickable links.</li>
-            <li>Added support for function hoisting in the Editor. Note this is disabled by default but
-              can be enabled from Xplore settings.</li>
-            <li>Reorganised the main information window and about section and included release notes.</li>
-            <li>Overhauled the Logs menu to include many more contextual links for logs generated
-              during the last script execution, as well as shortcut links to logs just generated today.</li>
-            <li>Added Select2 to Target and Scope selectors to make them easier to use.</li>
-            <li>Improved the gs log behaviour to work as close to native as possible. gs.debug(), gs.info(),
-              gs.warn() and gs.error() can now take 6 arguments while gs.log() will take 2 and gs.print() just 1.</li>
-            <li>Fixed a bug where opening a list with an encoded query containing single quotes would
-              not work because it was not properly escaped.</li>
-            <li>Minor improvements to Xplore processor.</li>
-            <li>Changed blacklist to ignorelist and redlist to warnlist.</li>
-            <li>Updated JSON implementation.</li>
-            <li>Fixed a bug with the Table Heirarchy generating an undefined exception.</li>
-            <li>Fixed a bug where user data would not format properly when formatted within a scope.</li>
-            <li>Fixed a bug with RegExp not showing unmatched alternative groups.</li>
-            <li>Fixed a UI issue with the header on narrower screens.</li>
-            <li>Fixed a bug where results might not be shown during scoped script execution.</li>
-            <li>Fixed a bug that prevented Ctrl+D (select next occurrence) from working in the editor.</li>
+            <li>Fixed "Open List in Xplore" list action.</li>
           </ul>
 
-          <h3>Version 4.7</h3>
+          <h3>Version 5.00</h3>
           <ul>
-            <li>Prevent Ctrl+Enter inserting new line in code.</li>
-            <li>Add support for Ctrl+S to execute the script.</li>
-            <li>Detect objects passed to gs.log/gs.info/gs.error/gs.debug and jslog methods and display them as JSON. (Server processing only applies when Fix Logs option is enabled.)</li>
+            <li>Redesigned the exploration experience with dynamic execution and nested property caching.</li>
+            <li>Improved explored object descriptions.</li>
+            <li>Fixed scoped execution for Xanadu.</li>
+            <li>Fixed issue preventing "Add Existing File" from working in Studio.</li>
+            <li>Improved glasses icon placement when resizing the browser in Polaris experience.</li>
+            <li>Xplore will automatically switch to the user's application scope by default.</li>
+            <li>Support for latest ECMAScript modes. (Requires application JavaScript mode to be set.)</li>
+            <li>Several other minor updates and fixes.</li>
           </ul>
 
           <p>The full changelog can be viewed on

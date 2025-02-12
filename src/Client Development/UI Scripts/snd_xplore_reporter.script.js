@@ -20,7 +20,7 @@ var snd_xplore_reporter = (function () {
         + ' on ' + result.start_time);
       $('#result_timestamp_container,#regenerate').removeClass('hidden');
     } else {
-      $('#result_timestamp_container').addClass('hidden');
+      $('#result_timestamp_container');
     }
 
     if (result.warning) {
@@ -44,8 +44,8 @@ var snd_xplore_reporter = (function () {
             copy_btn +
             '<strong>Value</strong><br>' +
           '</div>' +
-          '<pre class="prettyprint linenums">' + insertLinks(escapeHtml(formatForPre(result.string))) +
-          '</pre></td></tr>');
+          '<pre class="prettyprint linenums"><code>' + insertLinks(escapeHtml(formatForPre(result.string))) +
+          '</code></pre></td></tr>');
     }
   }
 
@@ -94,8 +94,8 @@ var snd_xplore_reporter = (function () {
           '</td>' +
         '</tr>');
         table.append('<tr class="data-more hidden">' +
-          '<td colspan="3" class="val"><pre class="prettyprint linenums">' +
-          escapeHtml(formatForPre(val)) + '</pre></td>' +
+          '<td colspan="3" class="val"><pre class="prettyprint linenums"><code>' +
+          escapeHtml(formatForPre(val)) + '</code></pre></td>' +
         '</tr>');
       } else {
         table.append('<tr class="data-row">' +
@@ -124,7 +124,7 @@ var snd_xplore_reporter = (function () {
 
     target.empty();
     if (!messages || !messages.length) {
-      $('#message_container').addClass('hidden');
+      $('#message_container');
       return;
     }
     for (var i = 0, m; i < messages.length; i++) {
@@ -552,6 +552,7 @@ var snd_xplore_reporter = (function () {
 
     this.done = function (result) {
       var updating_child = this.options.dotwalk_first;
+      var error;
       var item;
 
       if (!result) {
@@ -562,7 +563,7 @@ var snd_xplore_reporter = (function () {
 
       if (result.type == 'Error') {
         // Convert error result into error message
-        var error = findResult(['rhinoException'], result);
+        error = findResult(['rhinoException'], result);
         error = (error && error.string ? error.string : result.string).replace(/(^"|"$)/g, '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         error = error || 'Something went wrong with the request.';
         result.messages.push({
@@ -608,9 +609,9 @@ var snd_xplore_reporter = (function () {
       
       if (!item) {
         // if we haven't found an item then something must have changed
-        var error = 'Evaluated object has changed. Path to property ' + breadcrumbs.join('.') + ' is no longer valid.';
+        error = 'Evaluated object has changed. Path to property ' + breadcrumbs.join('.') + ' is no longer valid.';
         if (result.type == 'Error') {
-          item = $.extend({}, result)
+          item = $.extend({}, result);
           if (!cached_result) cached_result = item;
         } else {
           item = {
@@ -650,7 +651,7 @@ var snd_xplore_reporter = (function () {
 
     this.clearBreadcrumb = function () {
       breadcrumbs.length = 0;
-      $('ul#breadcrumb').addClass('hidden').find('li:not(.permanent)').remove();
+      $('ul#breadcrumb').find('li:not(.permanent)').remove();
       if (cached_result && this.options) {
         this.displayResults(cached_result, this.options);
       }
@@ -701,7 +702,7 @@ var snd_xplore_reporter = (function () {
       showTypes();
   
       $('#result_container').toggleClass('hidden', !result.type && result.type != 'Error' && !results);
-      $('#breadcrumb').toggleClass('hidden', !cached_result);
+      $('#breadcrumb').toggleClass('hidden', !cached_result || (!results && !breadcrumbs.length));
   
       this.fireEvent('done', null, [result]);
     };

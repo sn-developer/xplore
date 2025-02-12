@@ -316,7 +316,7 @@ snd_Xplore.prototype.lookAt = function (obj, name, options) {
     if (obj === null || obj === undefined) {
       result.type = '' + obj;
       result.string = result.type;
-      result.name = result.name || result.type;
+    //   result.name = result.name || result.type;
       return result;
     }
 

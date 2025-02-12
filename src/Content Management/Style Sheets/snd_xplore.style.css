@@ -1,70 +1,10 @@
 /*-----------------------------------
-        CODEMIRROR OVERRIDES
------------------------------------*/
-.CodeMirror {
-    line-height: 1.1em;
-    border: 1px solid #ccc;
-    box-sizing: content-box;
-}
-.CodeMirror-gutter {
-    min-width: 3em;
-}
-.cm_active_line {
-    background: #e8f2fe !important; 
-    width: 100%
-}
-.cm_error {
-    background: transparent url(/images/icons/error_12x12.jpgx) no-repeat scroll top left;
-}
-.cm_warning {
-    background: transparent url(/images/icons/warning_12x12.gifx) no-repeat scroll top left;
-}
-.codemirror .cm_error {
-    background: transparent url(/images/icons/error_12x12.jpgx) no-repeat scroll top left;
-}
-.codemirror .cm_warning {
-    background: transparent url(/images/icons/warning_12x12.gifx) no-repeat scroll top left;
-}
-.CodeMirror div {
-    line-height: 15px;
-    font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New", monospace;
-    font-size: 13px;
-}
-.outputmsg_error_fullscreen {
-    position: fixed;
-    bottom: 0px;
-    z-index: 1000;
-}
-.cm_unfold {
-    background: transparent url(/images/icons/filter_hide_12x12.gifx) no-repeat scroll top left;
-}
-.cm_fold {
-    background: transparent url(/images/icons/filter_reveal_12x12.gifx) no-repeat scroll top left;
-}
-.CodeMirror-gutter {
-    cursor: pointer;
-    min-width: 4.0em;
-}
-.CodeMirror-gutter-text pre {
-    padding-left: 20px;
-    text-align: right;
-}
-.CodeMirror-selected {
-    background: #d9d9d9;
-}
-.CodeMirror-focused .CodeMirror-selected {
-    background: #d7d4f0;
-}
-.CodeMirror pre {
-    background-color: transparent;
-}
-
-/*-----------------------------------
               XPLORE
 -----------------------------------*/
 
 body {
-  font-size: 12px;
+  /*font-size: 12px;*/
+  color: #333;
 }
 pre {
   font-size: 11px;
@@ -116,8 +56,17 @@ h5 {
   display: block;
 }
 
+.navbar {
+  min-height: 50px;
+  margin-bottom: 0;
+}
+
 .navbar-nav {
   margin: 0;
+}
+
+.navbar-brand {
+  height: 50px;
 }
 
 .label-as-badge {
@@ -192,6 +141,7 @@ sup .label-as-badge {
   left: 52px;
   right: 0;
   bottom: 0;
+  font-size: 12px;
 }
 
 #editor {
@@ -207,9 +157,21 @@ sup .label-as-badge {
   background: #fff;
 }
 
+#editor.fullScreen {
+  position: fixed;
+  z-index: 2000;
+  width: 100% !important;
+}
+.CodeMirror-hints {
+  z-index: 2001 !important;
+}
+
 #editor .CodeMirror,
 #editor .CodeMirror-scroll  {
   height: 100%;
+}
+#editor .CodeMirror-scroll {
+  max-height: none;
 }
 
 #info_pane {
@@ -559,14 +521,10 @@ li.L5, li.L6, li.L7, li.L8
   background-color: rgb(255,255,255,0.15);
 }
 
-/* Fix select2 color - it uses body color by default */
+/* Fix select2  */
 .select2-container {
   color: #333;
-}
-
-/* Fix select2 top margin in nav bar */
-.navbar-control .select2-container {
-  margin-top: 3px;
+  width: 100%;
 }
 
 /* Badges */
@@ -582,8 +540,38 @@ li.L5, li.L6, li.L7, li.L8
   background-color: tomato;
 }
 
-/* Margins */
+/*! ========================================================================
+ * Bootstrap Toggle: bootstrap-toggle.css v2.2.0
+ * http://www.bootstraptoggle.com
+ * ========================================================================
+ * Copyright 2014 Min Hur, The New York Times Company
+ * Licensed under MIT
+ * ======================================================================== */
+.checkbox label .toggle,.checkbox-inline .toggle{margin-left:-20px;margin-right:5px}
+.toggle{position:relative;overflow:hidden}
+.toggle input[type=checkbox]{display:none}
+.toggle-group{position:absolute;width:200%;top:0;bottom:0;left:0;transition:left .35s;-webkit-transition:left .35s;-moz-user-select:none;-webkit-user-select:none}
+.toggle.off .toggle-group{left:-100%}
+.toggle-on{position:absolute;top:0;bottom:0;left:0;right:50%;margin:0;border:0;border-radius:0}
+.toggle-off{position:absolute;top:0;bottom:0;left:50%;right:0;margin:0;border:0;border-radius:0}
+.toggle-handle{position:relative;margin:0 auto;padding-top:0;padding-bottom:0;height:100%;width:0;border-width:0 1px}
+.toggle.btn{min-width:59px;min-height:34px}
+.toggle-on.btn{padding-right:24px}
+.toggle-off.btn{padding-left:24px}
+.toggle.btn-lg{min-width:79px;min-height:45px}
+.toggle-on.btn-lg{padding-right:31px}
+.toggle-off.btn-lg{padding-left:31px}
+.toggle-handle.btn-lg{width:40px}
+.toggle.btn-sm{min-width:50px;min-height:30px}
+.toggle-on.btn-sm{padding-right:20px}
+.toggle-off.btn-sm{padding-left:20px}
+.toggle.btn-xs{min-width:35px;min-height:22px}
+.toggle-on.btn-xs{padding-right:12px}
+.toggle-off.btn-xs{padding-left:12px}
 
-.m-t {
-  margin-top: 15px;
-}
+/*! ========================================================================
+ * Google Code-Prettify
+ * https://github.com/googlearchive/code-prettify
+ * Apache License 2.0
+ * ======================================================================== */
+.pln{color:#000}@media screen{.str{color:#080}.kwd{color:#008}.com{color:#800}.typ{color:#606}.lit{color:#066}.clo,.opn,.pun{color:#660}.tag{color:#008}.atn{color:#606}.atv{color:#080}.dec,.var{color:#606}.fun{color:red}}@media print,projection{.kwd,.tag,.typ{font-weight:700}.str{color:#060}.kwd{color:#006}.com{color:#600;font-style:italic}.typ{color:#404}.lit{color:#044}.clo,.opn,.pun{color:#440}.tag{color:#006}.atn{color:#404}.atv{color:#060}}pre.prettyprint{padding:2px;border:1px solid #888}ol.linenums{margin-top:0;margin-bottom:0}li.L0,li.L1,li.L2,li.L3,li.L5,li.L6,li.L7,li.L8{list-style-type:none}li.L1,li.L3,li.L5,li.L7,li.L9{background:#eee}

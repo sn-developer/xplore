@@ -2,7 +2,7 @@
 A toolkit for every ServiceNow developer.
 
 ## Install Notes:
-Download the update set from [Share](https://developer.servicenow.com/app.do#!/share/contents/9650888_xplore_developer_toolkit) and install to your instance.
+Download the update set from [Share](https://developer.servicenow.com/connect.do#!/share/contents/9650888_xplore_developer_toolkit) and install to your instance.
 
 _Downloading from Share should mean you receive notifications when an update is made._
 

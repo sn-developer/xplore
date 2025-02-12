@@ -96,9 +96,26 @@
     "zenburn"
   ];
 
+  var session_token = gs.getSessionToken();
   var history_session_id = gs.generateGUID();
   var initial_scope = settings.load_user_scope ? gs.getCurrentApplicationScope() : 'global';
+
+  var editor_macros = (function () {
+    var macros = [];
+    var grd = new GlideRecord('syntax_editor_macro');
+    grd.orderBy('name');
+    grd.query();
+    while (grd.next()) {
+      macros.push({
+        name: grd.getValue('name'),
+        comments: grd.getValue('comments'),
+        text: grd.getValue('text')
+      });
+    }
+    return macros;
+  })();
 </g:evaluate>
+<j:set var="jvar_cssCacheString" value="v=${gs.getCssCacheVersionString()}" />
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -108,33 +125,30 @@
     <title>Xplore</title>
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" /> -->
+    <link rel="stylesheet" href="/styles/scss/sp-bootstrap-basic.scss?${jvar_cssCacheString}"></link>
 
     <!-- Bootstrap Toggle -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" integrity="sha512-hievggED+/IcfxhYRSr4Auo1jbiOczpqpLZwfTVL/6hFACdbI3WQ8S9NCX50gsM9QVE+zLk/8wb9TlgriFbX+Q==" crossorigin="anonymous" />
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesnt work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" integrity="sha512-hievggED+/IcfxhYRSr4Auo1jbiOczpqpLZwfTVL/6hFACdbI3WQ8S9NCX50gsM9QVE+zLk/8wb9TlgriFbX+Q==" crossorigin="anonymous" /> -->
 
     <!--CodeMirror Update-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css" integrity="sha512-xIf9AdJauwKIVtrVRZ0i4nHP61Ogx9fSRAkCLecmE2dL/U8ioWpDvFCAy4dcfecN72HHB9+7FfQj3aiO68aaaw==" crossorigin="anonymous" />
-
-    <!-- snd_xplore -->
-    <link href="/snd_xplore.cssdbx" rel="stylesheet" />
-
-    <!--CodeMirror Themes-->
-    <link rel="stylesheet" href="/snd_xplore_themes.cssdbx" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.css" integrity="sha512-xIf9AdJauwKIVtrVRZ0i4nHP61Ogx9fSRAkCLecmE2dL/U8ioWpDvFCAy4dcfecN72HHB9+7FfQj3aiO68aaaw==" crossorigin="anonymous" /> -->
+   <link rel="stylesheet" href="/styles/sp_codemirror_includes.css?${jvar_cssCacheString}" />
 
     <!-- Select2 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" integrity="sha512-nMNlpuaDPrqlEls3IX/Q56H36qvBASwb3ipuo3MxeWbsQB1881ox0cRv7UPTgBlriqoynt35KjEwgGUeUXIPnw==" crossorigin="anonymous" /> -->
+    <link rel="stylesheet" href="/styles/thirdparty/select2/select2.css?${jvar_cssCacheString}" />
+
+    <!-- snd_xplore -->
+    <link href="/snd_xplore.cssdbx?${jvar_cssCacheString}" rel="stylesheet" />
+
+    <!--CodeMirror Themes-->
+    <link rel="stylesheet" href="/snd_xplore_themes.cssdbx?${jvar_cssCacheString}" />
 
     <script>
-      window.snd_xplore_session_id = "${history_session_id}";
-	  window.snd_xplore_initial_scope = "${initial_scope}";
+    window.NOW_SESSION_TOKEN = "${session_token}";
+    window.snd_xplore_session_id = "${history_session_id}";
+    window.snd_xplore_initial_scope = "${initial_scope}";
     </script>
   </head>
   <g:evaluate jelly="true">var theme = settings.setting_theme;</g:evaluate>
@@ -161,7 +175,7 @@
           <ul class="nav navbar-nav">
             <li>
               <p class="navbar-control">
-                <select id="target" class="form-control">
+                <select id="target">
                   <option value="server">Server</option>
                   <option value="client">Client</option>
                 </select>
@@ -169,7 +183,7 @@
             </li>
             <li>
               <p class="navbar-control">
-                <select id="scope" class="form-control">
+                <select id="scope">
                   <option>Loading</option>
                 </select>
               </p>
@@ -177,19 +191,10 @@
             <li>
               <button id="xplore_btn" class="btn btn-success navbar-control"
                 title="Run (Ctrl + Enter)">Run</button>
-            </li>
-            <li>
               <button id="cancel_btn" class="btn btn-danger navbar-control"
                 title="Cancel Transaction" style="display:none">Cancel</button>
+              <span id="timer" class="text-lg text-primary" style="vertical-align: middle;"></span>
             </li>
-            <li>
-              <button id="format_btn" class="btn btn-default navbar-control"
-                title="Format (Ctrl + Shift + F)">
-                <i class="glyphicon glyphicon-align-left"></i>
-                <span class="sr-only">Format</span>
-              </button>
-            </li>
-            <li id="timer" class="navbar-brand"></li>
           </ul>
         </div>
       </nav>
@@ -247,7 +252,57 @@
         <div id="workbench">
 
           <div id="editor">
-            <textarea class="form-control" id="snd_xplore" rows="10"></textarea>
+            <div id="syntax_macros" style="display: none;">
+              <j:forEach items="${editor_macros}" var="jvar_macro">
+                <textarea class="syntax_macro" name="${HTML:jvar_macro.name}" comments="${HTML:jvar_macro.comments}">${HTML:jvar_macro.text}</textarea>
+              </j:forEach>
+            </div>
+            <div id="editor_toolbar" class="script-editor-toolbar btn-group btn-group-sm toolbar-padding-left padder-v-xs">
+              <a id="editor_commentSelection" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/comment_16.gifx" class="i16x16" />
+                <span class="sr-only">Comment Selection</span>
+              </a>
+              <a id="editor_formatCode" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/format_code.gifx" class="i16x16" />
+                <span class="sr-only">Format Code</span>
+              </a>
+              <a id="editor_replace" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/replace.gifx" class="i16x16" alt="Replace" />
+                <span class="sr-only">Replace</span>
+              </a>
+              <a id="editor_replaceAll" class="sn-tooltip-basic btn btn-default toolbar-padding-right" role="button" tabindex="-1">
+                <img src="images/icons/replace_all.gifx" class="i16x16" />
+                <span class="sr-only">Replace All</span>
+              </a>
+              <a id="editor_find" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/find.gifx" class="i16x16" alt="Start Searching" />
+                <span class="sr-only">Start Searching</span>
+              </a>
+              <a id="editor_findNext" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/find_next.gifx" class="i16x16" alt="Find Next" />
+                <span class="sr-only">Find Next</span>
+              </a>
+              <a id="editor_findPrev" class="sn-tooltip-basic btn btn-default toolbar-padding-right" role="button" tabindex="-1">
+                <img src="images/icons/find_previous.gifx" class="i16x16" alt="Find Previous" />
+                <span class="sr-only">Find Previous</span>
+              </a>
+              <a id="editor_fullScreen" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1">
+                <img src="images/icons/full_screen.gifx" class="i16x16" />
+                <span class="sr-only">Toggle Full Screen Mode</span>
+              </a>
+              <a id="editor_showKeyMap" class="sn-tooltip-basic btn btn-default toolbar-padding-right" role="button" tabindex="-1" title="Help" data-toggle="modal" data-target="#modal_editor_help">
+                <img src="images/icons/help.gifx" class="i16x16" />
+                <span class="sr-only">Help</span>
+              </a>
+              <a id="editor_scriptDebugger" class="sn-tooltip-basic btn btn-default" role="button" tabindex="-1" title="Open Script Debugger" data-script="${jvar_USER_SCRIPT}">
+                <img src="images/icons/debug_js.gifx" class="i16x16" alt="Open Script Debugger" />
+                <span class="sr-only">Open Script Debugger</span>
+              </a>
+              <div id="editor_showFeedbackForm"></div>
+            </div>
+            <div style="position: absolute; top: 40px; left: 0; right: 0; bottom: 0;">
+                <textarea class="form-control" id="snd_xplore" rows="10"></textarea>
+            </div>
             <div class="ui-resizable-handle ui-resizable-e"></div>
           </div>
 
@@ -290,7 +345,7 @@
                     title="View the hierarchy of a table">Table Hierarchy</a>
                 </li>
                 <li class="dropdown" role="presentation">
-                  <a href="javascript:void(0)" class="dropdown-toggle"
+                  <a href="javascript:void(0)" class="dropdown-toggle" role="button"
                     data-toggle="dropdown">Logs <span class="caret"></span></a>
                   <ul class="dropdown-menu" id="log_menu">
                     <li class="dropdown-header" id="filtered_log_menu_header">Logs from the last run</li>
@@ -347,7 +402,7 @@
                       <a id="clearBreadcrumb" href="javascript:void(0);">Result</a>
                     </li>
                   </ul>
-				  
+          
                   <div id="message_container">
                     <table class="table table-condensed" id="message_table">
                       <tr>
@@ -588,6 +643,37 @@
       </div><!-- /.wrapper -->
     </div> <!-- /.page -->
 
+  <div class="modal fade" id="modal_editor_help" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4>Editor Help</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row">
+            <div class="col-xs-12">
+              <h5>Keyboard shortcuts</h5>
+              <p>These are some of the keyboard shortcuts available:</p>
+              <table class="table" id="modal_editor_help_table"></table>
+              <hr />
+              <div class="row">
+                <div class="col-xs-12">
+                  <a href="/nav_to.do?uri=syntax_editor_macro_list.do" target="_blank" class="text-sm pull-right m-t">
+                    Manage Macros <i class="glyphicon glyphicon-new-window"></i></a>
+                  <h5>Syntax macros</h5>
+                </div>
+              </div>
+              <p>Syntax macros allow you to type a word, hit <kbd>Enter</kbd>
+                and have the word replaced with the content of the macro.</p>
+
+              <table class="table" id="modal_editor_macro_table"></table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
     <div class="modal fade" id="modal_about" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document" style="max-width: 500px;">
         <div class="modal-content">
@@ -636,12 +722,12 @@
               <a href="http://getbootstrap.com/" target="_blank" rel="noopener noreferrer nofollow">Bootstrap</a>,
               <a href="http://jquery.com/" target="_blank" rel="noopener noreferrer nofollow">JQuery</a>,
               <a href="http://codemirror.net/" target="_blank" rel="noopener noreferrer nofollow">CodeMirror</a>,
-              <a href="http://www.bootstraptoggle.com/" rel="noopener noreferrer nofollow">Bootstrap Toggle</a>,
-              <a href="http://github.com/google/code-prettify" rel="noopener noreferrer nofollow">Google Code-Prettify</a>.
-              and <a href="https://github.com/codedance/jquery.AreYouSure" rel="noopener noreferrer nofollow">jQuery Plugin: Are-You-Sure</a>.
+              <a href="http://www.bootstraptoggle.com/" target="_blank" rel="noopener noreferrer nofollow">Bootstrap Toggle</a>,
+              <a href="http://github.com/google/code-prettify" target="_blank"  rel="noopener noreferrer nofollow">Google Code-Prettify</a>.
+              and <a href="https://github.com/codedance/jquery.AreYouSure" target="_blank"  rel="noopener noreferrer nofollow">jQuery Plugin: Are-You-Sure</a>.
             </p>
 
-            <p class="text-muted small">Licence under the MIT License (MIT). Copyright © 2015 - 2022 James Neale.</p>
+            <p class="text-muted small">Licence under the MIT License (MIT). Copyright © 2015 - 2025 James Neale.</p>
           </div>
         </div>
       </div>
@@ -667,7 +753,7 @@
               </div>
               <div class="col-xs-6">
                 <div class="m-t">
-                  <select class="form-control xplore-setting" id="setting_theme" name="setting_theme">
+                  <select class="xplore-setting" id="setting_theme" name="setting_theme">
                     <option value="default">Default</option>
                     <j:forEach items="${themes}" var="jvar_theme">
                       <g:evaluate jelly="true">var selected = theme == jelly.jvar_theme;</g:evaluate>
@@ -695,7 +781,7 @@
               <div class="col-xs-2">
                 <div class="m-t text-center" style="max-width: 75px">
                   <g:evaluate jelly="true">var max_depth = settings.max_depth</g:evaluate>
-                  <select class="form-control xplore-setting" id="max_depth" name="max_depth">
+                  <select class="xplore-setting" id="max_depth" name="max_depth">
                     <j:forEach begin="1" end="${snd_Xplore.MAX_DEPTH}" indexVar="jvar_i">
                       <g:evaluate jelly="true">var selected = max_depth == jelly.jvar_i;</g:evaluate>
                       <j:if test="${selected}">
@@ -709,8 +795,8 @@
                 </div>
               </div>
             </div>
-			
-			      <div class="row">
+      
+            <div class="row">
               <div class="col-xs-9 col-sm-8">
                 <h5>Load with User Scope</h5>
                 <p class="text-muted">
@@ -733,7 +819,7 @@
               </div>
             </div>
 
-			      <div class="row">
+            <div class="row">
               <div class="col-xs-9 col-sm-8">
                 <h5>Use ES Latest</h5>
                 <p class="text-muted">
@@ -968,49 +1054,51 @@
 
     <div class="modal-dialog alert alert-info fade" id="notification"></div>
 
-    <!-- jQuery (necessary for Bootstraps JavaScript plugins) -->
-    <!--
-      Sticking with jQuery 1 as it's compatible with Bootstrap 3.
-      Upgrading to jQuery 3 caused CSS issues in the tab-panes.
-    -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"
+    <!-- jQuery and jQuery UI -->
+    <!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js"
             integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
-            crossorigin="anonymous"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+            crossorigin="anonymous"></script> -->
+    <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-            crossorigin="anonymous"></script>
+            crossorigin="anonymous"></script> -->
+    <script src="/scripts/lib/jquery/jquery-2.2.3.min.js"></script>
+    <script src="/snd_xplore.jquery-ui.min.jsdbx"></script>
 
     <!-- Select2 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" integrity="sha512-2ImtlRlf2VVmiGZsjm9bEyhjGW4dU7B6TNwh/hx/iSByxNENtj3WVE6o/9Lj4TJeVXPi4bnOIMXFIJJAeufa0A==" crossorigin="anonymous"></script> -->
+    <script src="/scripts/thirdparty/select2/select2.js"></script>
 
     <!-- Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script> -->
+    <script src="/scripts/bootstrap3/bootstrap.js"></script>
 
     <!-- Bootstrap Toggle -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js" integrity="sha512-F636MAkMAhtTplahL9F6KmTfxTmYcAcjcCkyu0f0voT3N/6vzAuJ4Num55a0gEJ+hRLHhdz3vDvZpf6kqgEa5w==" crossorigin="anonymous"></script> -->
+  <script src="/snd_xplore.bootstrap-toggle.min.jsdbx"></script>
 
     <!-- Xplore -->
     <script src="/snd_xplore.jsdbx"></script>
     <script src="/snd_xplore_reporter.jsdbx"></script>
 
     <!--CodeMirror Update-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js" integrity="sha512-zuvaVNiXwWY7U7HEdXsoTislTEElpKLELFoyQw0Bg7zfGhC4vG8eAhCxIQAvHmprW7dFhTq5zshUko4K3B4mSA==" crossorigin="anonymous"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/codemirror.min.js" integrity="sha512-zuvaVNiXwWY7U7HEdXsoTislTEElpKLELFoyQw0Bg7zfGhC4vG8eAhCxIQAvHmprW7dFhTq5zshUko4K3B4mSA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/addon/edit/matchbrackets.min.js" integrity="sha512-GlBJlDrIKL93TzLT5WYpPw9wRicOOghofNDodqg9WXPyLLFFb4RSERKonID8LLs6GpCCgXCbEGIraojzI+ngPA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/mode/javascript/javascript.min.js" integrity="sha512-EKqHN1wvffwb5Hx+y5JeXPGNDKKxxW1Es4hexkgSf+QkQwEDNs6bp4KKCRNVLUbRPGkrDQ7yEVwvDg1tq7n1fA==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/addon/hint/javascript-hint.min.js" integrity="sha512-2zi+0HSB5MXoy+BenDX/EKjqN6eUnsG2Lh9cpx+Ckua3Yi2XupO8ife9VELSg8iR7AT98yHQNyyaAL4ImVHcoQ==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/addon/comment/comment.min.js" integrity="sha512-VQ13rjo5LQmLPtbaWGV4DWx1Zbggd+MZVj6FGT6ltCbUiAN3e/7Usf61eO9vdXENLruXjEeEC3ADoN09P00R4A==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/addon/search/searchcursor.min.js" integrity="sha512-WjPtMaVG4q6cJDk6ErkkZt87NQ8NAyk35hoBbylGAnNTiDara/vHlpGKCdhXFwBFQ26nRpyW7cNmv0tKVLE6ww==" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/keymap/sublime.min.js" integrity="sha512-Z2h8JV7HR8dsltSOC7rrvVvvxHGj6cNvDDA3AJO99Nzvx5h28qT3KjqmwblYIGm/tEv319Cb+pORlgCnYADqYQ==" crossorigin="anonymous"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.58.3/keymap/sublime.min.js" integrity="sha512-Z2h8JV7HR8dsltSOC7rrvVvvxHGj6cNvDDA3AJO99Nzvx5h28qT3KjqmwblYIGm/tEv319Cb+pORlgCnYADqYQ==" crossorigin="anonymous"></script> -->
+    <script src="/scripts/libs/sp_codemirror_includes.js"></script>
     <script src="/scripts/snc-code-editor/js-beautify.js"></script>
+  <script src="/snd_xplore.codemirror.keymap.sublime.min.jsdbx"></script>
 
 
     <!-- Google Code Prettify -->
-    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+  <!-- CSS is included in snd_xplore stylesheet -->
+  <script src="/snd_xplore.google.code-prettify.min.jsdbx"></script>
 
-
+    <script src="/scripts/scriptDebugger/launchScriptDebugger.js"></script>
     <script src="/snd_xplore_ui.jsdbx"></script>
-
   </body>
 </html>
 </j:jelly>

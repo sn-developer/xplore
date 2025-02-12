@@ -35,7 +35,7 @@ ActionList.prototype.deleteScriptHistoryItem = function (params) {
 ActionList.prototype.storeScriptHistory = function (params) {
   var sh = new snd_Xplore.ScriptHistory();
   sh.store(params);
-}
+};
 
 /**
   summary:
@@ -301,7 +301,10 @@ function XploreRunner() {
   this.reporter_name = 'snd_Xplore.ObjectReporter';
 }
 
-XploreRunner.USER_SCRIPT = 'snd_Xplore_code_' + gs.getUserID();
+XploreRunner.USER_SCRIPT = (function () {
+  var name = String(gs.getImpersonatingUserName() || gs.getUserName());
+  return 'snd_Xplore_code_' + name.replace(/[^a-zA-Z0-9_]+/g, '_');
+})();
 
 /**
   summary:
@@ -390,10 +393,14 @@ XploreRunner.prototype.run = function run(options) {
     // init logtail here so we don't capture the logRequest() above
     //snd_Xplore.Logtail.start();
 
-    if (options.scope && options.scope != 'global') {
+    // if (options.scope && options.scope != 'global') {
       report = this.runScopedScript(script, options);
-    } else {
-      report = this.runGlobalScript(script, options);
+    // } else {
+    //   report = this.runGlobalScript(script, options);
+    // }
+
+    if (snd_Xplore.$caught) {
+      snd_Xplore.notice('script result was thrown.');
     }
 
   } catch (e) {
@@ -544,7 +551,7 @@ XploreRunner.prototype.runGlobalScript = function runGlobalScript(script, option
 
   // try to catch exceptions here - this won't catch all exceptions
   // newlines will affect the exception lineNumber
-  script = 'try { ' + script + ';\n} catch (e) { e; }';
+  script = 'try { ' + script + ';\n} catch (e) { global.snd_Xplore.$caught = true; e; }';
   global.user_data = options.user_data; // not ideal doing this
   obj = GlideEvaluator.evaluateString(script);
   x = new snd_Xplore();
@@ -559,22 +566,37 @@ XploreRunner.prototype.runGlobalScript = function runGlobalScript(script, option
     An object of options
  */
 XploreRunner.prototype.getUserScriptInclude = function getUserScriptInclude(options) {
-  // We have to insert a real script include to avoid dynamic script prevention (only in node logs)
+
+  if (!options) options = {scope: 'global'};
+
+  // We have to insert a real script include to avoid dynamic script prevention (only explained in node logs)
   // Example error:
   // *** WARNING *** Security restricted: GlideScopedEvaluator: Prohibited dynamic script against scope 'x_snd_eb' from scope 'rhino.global'
   var run_scope = this.getRunScope(options.scope);
   var gr = new GlideRecord("sys_script_include");
   gr.get("name", XploreRunner.USER_SCRIPT);
+
+  gr.setWorkflow(false); // prevent adding to update set
+  gr.setUseEngines(false); // prevent version control
+
   if (!gr.isValidRecord()) {
     gr.newRecord();
     gr.name = XploreRunner.USER_SCRIPT;
-    gr.api_name = options.scope + '.' + gr.name;
-	  gr.access = 'public';
+    gr.api_name = 'global.' + gr.name;
+	gr.sys_scope = gr.sys_package = "global";
+	gr.description = 'This script is used to run scoped code in Xplore for ' +
+		gs.getUserDisplayName() + ' [' + gs.getUserName() + '].';
+
+	// this must always be public otherwise we risk not being able to edit/remove the record
+    gr.access = 'public';
+	
     gr.insert();
   }
+
   gr.name = XploreRunner.USER_SCRIPT;
   gr.api_name = options.scope + '.' + gr.name;
   gr.sys_scope = run_scope;
+
   return gr;
 };
 
@@ -602,8 +624,18 @@ XploreRunner.prototype.runScopedScript = function runScopedScript(script, option
   var gr = this.getUserScriptInclude(options);
   var result;
   try {
-    gr.script = 'try {' + script + '\n} catch (e) { e; }';
-    gr.update();
+    gr.script = 'try {' + script + '\n} catch (e) { global.snd_Xplore.$caught = true; e; }';
+
+	/**
+	 * Trying to change the application scope programatically generates a warning:
+	 * "The Application field cannot be changed for application My First App"
+	 * Although the gr.update() fails to update, this is required for the
+	 * script to be executed.
+	 */
+	if (gr.sys_scope != 'global' && !gr.update()) {
+		// snd_Xplore.gserror('Failed to save record to scope ' + gr.sys_scope);
+		gs.flushAccessMessages(); // prevent this access error from showing as an Xplore warning
+	}
 
     var gse = new GlideScopedEvaluator();
     gse.putVariable("user_data", options.user_data);
@@ -611,15 +643,19 @@ XploreRunner.prototype.runScopedScript = function runScopedScript(script, option
   } catch (e) {
     result = e;
   } finally {
-    gr.setUseEngines(false); // we don't need version control for the reset
-    // gr.script = '';
-    gr.sys_scope = "global";
-    gr.update();
+	// gr.script = '';
+	gr.sys_scope = gr.sys_package = "global";
+	gr.api_name = "global." + gr.name;
+	if (!gr.update()) {
+		snd_Xplore.gserror('Failed to reset scope.');
+	}
   }
 
   var x = new global.snd_Xplore();
   x.xplore(result, "snd_Xplore.ObjectReporter", options);
-  return x.reporter.getReport();
+
+  var report = x.reporter.getReport();
+  return report; 
 };
 
 /**
@@ -1228,6 +1264,10 @@ function XploreTableHierarchy(table, options) {
 
   // send the requested template or the main interface
   else {
+
+    // ensure script include
+    MACRO_VARS.USER_SCRIPT = '' + (new XploreRunner().getUserScriptInclude().sys_id);
+
     response = processTemplate(params.template || UI_MAIN, MACRO_VARS);
     g_processor.writeOutput('text/html', response);
   }
